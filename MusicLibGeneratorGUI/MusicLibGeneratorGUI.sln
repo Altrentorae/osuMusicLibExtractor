@@ -1,27 +1,35 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28010.2048
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32505.426
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MusicLibGeneratorGUI", "MusicLibGeneratorGUI\MusicLibGeneratorGUI.csproj", "{AB09ED45-DBC0-487E-B68F-39A4012656E5}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F5DDAE86-3536-4309-92A5-CAF22FF095A0} = {F5DDAE86-3536-4309-92A5-CAF22FF095A0}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MusicLibGenerator", "..\MusicLibGenerator\MusicLibGenerator\MusicLibGenerator.csproj", "{F5DDAE86-3536-4309-92A5-CAF22FF095A0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		CombinedDebug|Any CPU = CombinedDebug|Any CPU
+		CombinedRelease|Any CPU = CombinedRelease|Any CPU
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{AB09ED45-DBC0-487E-B68F-39A4012656E5}.CombinedDebug|Any CPU.ActiveCfg = CombinedDebug|Any CPU
 		{AB09ED45-DBC0-487E-B68F-39A4012656E5}.CombinedDebug|Any CPU.Build.0 = CombinedDebug|Any CPU
+		{AB09ED45-DBC0-487E-B68F-39A4012656E5}.CombinedRelease|Any CPU.ActiveCfg = CombinedRelease|Any CPU
+		{AB09ED45-DBC0-487E-B68F-39A4012656E5}.CombinedRelease|Any CPU.Build.0 = CombinedRelease|Any CPU
 		{AB09ED45-DBC0-487E-B68F-39A4012656E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AB09ED45-DBC0-487E-B68F-39A4012656E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AB09ED45-DBC0-487E-B68F-39A4012656E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AB09ED45-DBC0-487E-B68F-39A4012656E5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F5DDAE86-3536-4309-92A5-CAF22FF095A0}.CombinedDebug|Any CPU.ActiveCfg = CombinedDebug|Any CPU
 		{F5DDAE86-3536-4309-92A5-CAF22FF095A0}.CombinedDebug|Any CPU.Build.0 = CombinedDebug|Any CPU
+		{F5DDAE86-3536-4309-92A5-CAF22FF095A0}.CombinedRelease|Any CPU.ActiveCfg = CombinedRelease|Any CPU
+		{F5DDAE86-3536-4309-92A5-CAF22FF095A0}.CombinedRelease|Any CPU.Build.0 = CombinedRelease|Any CPU
 		{F5DDAE86-3536-4309-92A5-CAF22FF095A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F5DDAE86-3536-4309-92A5-CAF22FF095A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F5DDAE86-3536-4309-92A5-CAF22FF095A0}.Release|Any CPU.ActiveCfg = Release|Any CPU

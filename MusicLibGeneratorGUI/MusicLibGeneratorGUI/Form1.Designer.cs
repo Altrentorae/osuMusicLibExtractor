@@ -33,7 +33,6 @@
             this.start_button = new System.Windows.Forms.Button();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.folderRadio = new System.Windows.Forms.RadioButton();
             this.iniRadio = new System.Windows.Forms.RadioButton();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -123,7 +122,6 @@
             // 
             // groupBox1
             // 
-            this.groupBox1.Controls.Add(this.folderRadio);
             this.groupBox1.Controls.Add(this.iniRadio);
             this.groupBox1.Location = new System.Drawing.Point(13, 95);
             this.groupBox1.Name = "groupBox1";
@@ -131,17 +129,6 @@
             this.groupBox1.TabIndex = 6;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Search Type";
-            // 
-            // folderRadio
-            // 
-            this.folderRadio.AutoSize = true;
-            this.folderRadio.Location = new System.Drawing.Point(6, 43);
-            this.folderRadio.Name = "folderRadio";
-            this.folderRadio.Size = new System.Drawing.Size(81, 17);
-            this.folderRadio.TabIndex = 1;
-            this.folderRadio.Text = "Hierarchical";
-            this.folderRadio.UseVisualStyleBackColor = true;
-            this.folderRadio.CheckedChanged += new System.EventHandler(this.folderRadio_CheckedChanged);
             // 
             // iniRadio
             // 
@@ -196,7 +183,6 @@
         private System.Windows.Forms.Button start_button;
         private System.Windows.Forms.ProgressBar progressBar1;
         private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.RadioButton folderRadio;
         private System.Windows.Forms.RadioButton iniRadio;
     }
 }

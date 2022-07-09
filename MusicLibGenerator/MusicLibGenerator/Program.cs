@@ -100,7 +100,18 @@ namespace MusicLibGenerator {
             foreach(string mfile in osuFiles) {
 
                 //Read file fir details
-                string[] lines = System.IO.File.ReadAllLines(mfile);
+                string[] lines;
+                try 
+                {
+                    lines = System.IO.File.ReadAllLines(mfile);
+                }
+                catch (DirectoryNotFoundException e)
+                {
+                    failedCopies++;
+                    ExLogger.LogErr($"DirectoryNotFoundException thrown in Main_iniMethod_Complex loop.\nThis is normally a result of path lengths over 260 chars.\nPath: {e.Message}");
+                    return innersong;
+                }
+
                 Song innerSong = new Song();
                 bool p = false;
                 bool t = false;
@@ -232,8 +243,14 @@ namespace MusicLibGenerator {
                 //ARGS
                 osuDirectory = args[0];
                 newDirectory = args[1];
-                
+
+
+                //Console.WriteLine("PATH A: " + args[0]);
+                //Console.WriteLine("PATH B: " + args[1]);
+
+
                 //Get list of folders
+
                 string[] SongDirs = Directory.GetDirectories(osuDirectory);
 
                 //

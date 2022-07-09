@@ -40,10 +40,22 @@ namespace MusicLibGeneratorGUI {
             try {
                 string cb = dupecheck_Checkbox.Checked ? "true" : "false";
                 string mType = iniRadio.Checked ? "-i" : "-s";
+
+                
+                string pathA = "\"" + osuPathEntry.Text + "\\\\\"";
+                string pathB = "\"" + targetPathEntry.Text + "\\\\\"";
+                
+                
+
+                //string pathA = osuPathEntry.Text;
+                //string pathB = targetPathEntry.Text;
+
+                Console.WriteLine(pathA);
+                Console.WriteLine(pathB);
+
                 proc.StartInfo.FileName = "MusicLibGenerator.exe";
                 proc.StartInfo.Arguments =
-                    osuPathEntry.Text + " " +
-                    targetPathEntry.Text + " " +
+                    pathA + " " + pathB + " " +
                     cb + " " +
                     mType;
                 proc.Start();
@@ -272,7 +284,7 @@ namespace MusicLibGeneratorGUI {
                         }
                         if (SA[3].Split('=').Length == 2) {
                             iniRadio.Checked = SA[3].Split('=')[1] == "ini";
-                            folderRadio.Checked = !iniRadio.Checked;
+                            //folderRadio.Checked = !iniRadio.Checked;
                         }
                         
                     }

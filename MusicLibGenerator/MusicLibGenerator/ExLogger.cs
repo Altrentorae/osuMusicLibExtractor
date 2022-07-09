@@ -15,5 +15,17 @@ namespace MusicLibGenerator {
                 Console.WriteLine(ex.ToString());
             }
         }
+        public static void LogErr(string message)
+        {
+            string path = @"ErrLog.log";
+            using (StreamWriter sw = File.AppendText(path))
+            {
+                sw.WriteLine($"-----{DateTime.Now}-----");
+                sw.WriteLine($"Exception thrown: {message}");
+#if DEBUG
+                Console.WriteLine(message);
+#endif
+            }
+        }
     }
 }
