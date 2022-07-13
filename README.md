@@ -18,7 +18,9 @@ Copies all your osu! music to a new folder, while applying metadata to the mp3
 
 Enter your osu! song directory and your destination directory. You can open a file explorer window for this by clicking the `?` to the right of each text box.
 
-Search type is recommended to be left set to `.ini index`, as this is the more accurate method. However you can attempt to use `Hierarchical`, but do not expect good results.
+~~Search type is recommended to be left set to `.ini index`, as this is the more accurate method. However you can attempt to use `Hierarchical`, but do not expect good results.~~
+
+Hierarchical is no longer supported, ini is now default.
 
 For using the UI this is all there really is to it, if there are any errors they should be displayed or logged.
 
@@ -31,7 +33,8 @@ For using the UI this is all there really is to it, if there are any errors they
 * Arg 1 = your osu! songs directory, for example: `E:\osu!\Songs`
 * Arg 2 = directory for the results to be copied to, for example: `E:\Music`
 * Arg 3 = True or False, whether to skip songs that share a folder ID. if unsure use `True`
-* Arg 4 = `-s` or `-i`, whether to use Simple hierarchical search or ini index search
+* Arg 4 = True or False, whether to log skipped or failed songs to file (Log.log)
+* Arg 5 = True or False, whether to force existing metadata from the ORIGINAL file to be replaced
 
 --
 
