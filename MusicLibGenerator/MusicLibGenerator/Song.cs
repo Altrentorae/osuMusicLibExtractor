@@ -12,6 +12,7 @@ namespace MusicLibGenerator {
             ShouldSkip = false;
         }
         public string path { get; set; }
+        public string imgPath { get; set; }
         public string ID { get; set; }
         public string newDir { get; set; }
         public string fileName { get; set; }

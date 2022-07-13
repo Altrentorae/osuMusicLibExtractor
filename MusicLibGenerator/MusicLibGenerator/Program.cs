@@ -97,11 +97,13 @@ namespace MusicLibGenerator {
 
             //ADD ALL SONG PATHS FROM MASTER FILES
             List<Song> innerSongs = new List<Song>();
-            foreach(string mfile in osuFiles) {
+            string cacheImagePath = null;
+            foreach (string mfile in osuFiles)
+            {
 
                 //Read file fir details
                 string[] lines;
-                try 
+                try
                 {
                     lines = System.IO.File.ReadAllLines(mfile);
                 }
@@ -116,50 +118,110 @@ namespace MusicLibGenerator {
                 bool p = false;
                 bool t = false;
                 bool a = false;
+                bool img = false;
 
-                foreach(string line in lines) {
+                int lineNum = 0;
+                foreach (string line in lines)
+                {
                     string[] split = line.Split(':');
                     //Get Audio
-                    if (split[0] == "AudioFilename") {
-                        innerSong.path=(innerpath+"\\"+split[1].TrimStart());
-                        
+                    if (split[0] == "AudioFilename")
+                    {
+                        innerSong.path = (innerpath + "\\" + split[1].TrimStart());
+
                         p = true;
                     }
                     //Get title
-                    if(split[0] == "Title") {
+                    if (split[0] == "Title")
+                    {
                         innerSong.Title = split[1];
                         t = true;
                     }
                     //Get artist
-                    if(split[0] == "Artist") {
+                    if (split[0] == "Artist")
+                    {
                         innerSong.Artist = split[1];
                         a = true;
                     }
+                    //Get image path
+                    if (line == "[Events]" && cacheImagePath == null)
+                    {
+                        //try
+                        //{
+                        int mod = 1;
+                        while (true)
+                        {
+                            if (lines[lineNum + mod].StartsWith("//"))
+                            {
+                                mod++;
+                                continue;
+                            }
+                            else
+                            {
+                                string[] innersplit = lines[lineNum + mod].Split(',');
+                                foreach (string inner in innersplit)
+                                {
+                                    if (inner.Contains("\""))
+                                    {
+                                        string innerNoQuote = inner.Replace("\"", string.Empty);
+                                        innerSong.imgPath = innerpath + "\\" + innerNoQuote;
+                                        if (!System.IO.File.Exists(innerSong.imgPath)) 
+                                        { 
+                                            innerSong.imgPath = null;
+                                        }
+                                        if(cacheImagePath == null && innerSong.imgPath != null) { 
+                                            cacheImagePath = innerSong.imgPath; 
+                                        }
+                                        img = true;
+                                        break;
+                                    }
+                                }
+                                break;
+                            }
+                            //}
+                        }
+                        //catch (Exception) { }
+                    }
                     //check if all details gathered
-                    if (p&&t&&a) {
+                    if (p && t && a && img)
+                    {
                         break;
                     }
 
+                    lineNum++;
+
                     //for testing purposes only
-                    if (innerSongs.Count > 1) {
+                    if (innerSongs.Count > 1)
+                    {
                         int gniuoegunheio = innerSongs.Count;
                     }
                 }
 
                 innerSong.newDir = newDirectory + "\\" + SanitizePathString(innerSong.Artist) + " - " + SanitizePathString(innerSong.Title) + ".mp3";
-              
+
+
                 bool add = true;
-                foreach(Song song in innerSongs) {
-                    if(song.path == innerSong.path) {
+                foreach (Song song in innerSongs)
+                {
+                    if (song.path == innerSong.path)
+                    {
                         add = false;
                     }
                 }
-                if (add) {
+                if (add)
+                {
                     innerSongs.Add(innerSong);
                 }
-            }
 
-            return innerSongs;
+                string imgPath = innerSong.imgPath ?? cacheImagePath;
+                if(imgPath == null)
+                {
+                    ExLogger.Log("IMGPATHING", $"Image not found for path ({innerSong.path})");
+                    //System.Diagnostics.Debugger.Break();
+                }
+            }
+                return innerSongs;
+
 
         }
 
@@ -175,6 +237,8 @@ namespace MusicLibGenerator {
 
         static void WriteFile(List<Song> songs) {
 
+            
+
             foreach (Song song in songs) {
                 //FILE WRITING
                 if (!System.IO.File.Exists(song.path)) {
@@ -188,11 +252,34 @@ namespace MusicLibGenerator {
                 System.IO.File.Copy(song.path, song.newDir, true);
 
                 //FILE TAGGING
+
                 var tfile = TagLib.File.Create(song.newDir);
+                
+                Tag t = tfile.GetTag(TagTypes.Id3v2);
+                tfile.RemoveTags(TagTypes.Id3v2);
+                Tag tags = tfile.GetTag(TagTypes.Id3v2);
+                tfile.GetTag(TagTypes.Id3v2, true);
+                tfile.Save();
+                tfile = TagLib.File.Create(song.newDir);
+                tags = t;
+
                 tfile.Tag.Title = string.IsNullOrWhiteSpace(tfile.Tag.Title) ? song.Title : tfile.Tag.Title;
 
                 if (tfile.Tag.Performers.Length == 0) {
                     tfile.Tag.Performers = new string[] { song.Artist };
+                }
+
+                if (tfile.Tag.Pictures.Length == 0 && song.imgPath != "" && song.imgPath != null) {
+
+                    tfile.Tag.Pictures = new TagLib.IPicture[]
+                    {
+                        new TagLib.Picture()
+                        {
+                            Type = PictureType.FrontCover,
+                            Data = TagLib.ByteVector.FromPath(song.imgPath)
+                            
+                        }
+                    };
                 }
 
                 tfile.Save();
@@ -239,7 +326,10 @@ namespace MusicLibGenerator {
                 }
             }
 
-            try {
+#if DEBUG == false
+            try 
+            {
+#endif
                 //ARGS
                 osuDirectory = args[0];
                 newDirectory = args[1];
@@ -291,7 +381,7 @@ namespace MusicLibGenerator {
                 //Console.ReadKey();
                 Environment.Exit((int)Exit.Success);
 
-
+#if DEBUG == false
             }
             catch (Exception e) {
                 if (!NO_WINDOW) {
@@ -300,6 +390,7 @@ namespace MusicLibGenerator {
                 e.LogException();
                 Environment.Exit((int)Exit.LoggedErr);
             }
+#endif
         }
 
         

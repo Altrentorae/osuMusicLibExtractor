@@ -27,5 +27,19 @@ namespace MusicLibGenerator {
 #endif
             }
         }
+
+        public static void Log(string title, string message)
+        {
+            string path = @"Log.log";
+            using (StreamWriter sw = File.AppendText(path))
+            {
+                if (title != null) { sw.WriteLine($"{DateTime.Now} - {title}: {message}"); }
+                else { sw.WriteLine($"{DateTime.Now} - Message Logged: {message}"); }
+#if DEBUG
+                if (title != null) { Console.WriteLine($"{DateTime.Now} - {title}: {message}"); }
+                else { Console.WriteLine($"{DateTime.Now} - Message Logged: {message}"); }
+#endif
+            }
+        }
     }
 }
