@@ -44,7 +44,8 @@ namespace MusicLibGeneratorGUI {
                 
                 string pathA = "\"" + osuPathEntry.Text + "\\\\\"";
                 string pathB = "\"" + targetPathEntry.Text + "\\\\\"";
-                
+
+                string logging = logging_checkbox.Checked ? "true" : "false";
                 
 
                 //string pathA = osuPathEntry.Text;
@@ -56,8 +57,8 @@ namespace MusicLibGeneratorGUI {
                 proc.StartInfo.FileName = "MusicLibGenerator.exe";
                 proc.StartInfo.Arguments =
                     pathA + " " + pathB + " " +
-                    cb + " " +
-                    mType;
+                    cb + " " + 
+                    logging;
                 proc.Start();
                 proc.WaitForExit();
                 if (notableErrs.Contains((uint)proc.ExitCode)) {
@@ -108,14 +109,14 @@ namespace MusicLibGeneratorGUI {
         }
 
         private void UI_OptionsHandler(mType m) {
-            switch (m) {
-                case mType.Simple:
-                    dupecheck_Checkbox.Enabled = true;
-                    break;
-                case mType.ini:
-                    dupecheck_Checkbox.Enabled = false;
-                    break;
-            }
+            //switch (m) {
+            //    case mType.Simple:
+            //        dupecheck_Checkbox.Enabled = true;
+            //        break;
+            //    case mType.ini:
+            //        dupecheck_Checkbox.Enabled = false;
+            //        break;
+            //}
         }
         #endregion
 
@@ -143,6 +144,7 @@ namespace MusicLibGeneratorGUI {
             IncorrectAmountArgs = 2,
             DupecheckArgUnresolved = 3,
             InvalidSongPath = 4,
+            LoggingArgUnresolved = 6,
             //GUI Proj Specific
             MainExeMissing = 101,
             ConfigError = 102,
@@ -156,6 +158,7 @@ namespace MusicLibGeneratorGUI {
                 case ExitCodes.LoggedErr: e = "An unknown error has occurred, see ErrLog.log for details."; break;
                 case ExitCodes.InvalidSongPath: e = "Song path was invalid, please enter a valid song path ending in \\osu!\\Songs"; break;
                 case ExitCodes.IncorrectAmountArgs:
+                case ExitCodes.LoggingArgUnresolved:
                 case ExitCodes.DupecheckArgUnresolved: e = "This shouldn't be possible, what have you done???"; break;
                 //
                 case ExitCodes.MainExeMissing: e = "MusicLibGenerator.exe was not found"; break;
@@ -252,12 +255,14 @@ namespace MusicLibGeneratorGUI {
         private void WriteSettingsToFile() {
             if (startUp) { return; }
             string cb = dupecheck_Checkbox.Checked ? "true" : "false";
+            string lo = logging_checkbox.Checked ? "true" : "false";
             string mTypeStr = iniRadio.Checked ? "ini" : "simple";
             using (StreamWriter sw = new StreamWriter("savedConfig.cfg", false)){
                 sw.WriteLine("songPath=" + osuPathEntry.Text);
                 sw.WriteLine("targetDir=" + targetPathEntry.Text);
                 sw.WriteLine("dupechecking=" + cb);
                 sw.WriteLine("mType=" + mTypeStr);
+                sw.WriteLine("logging=" + lo);
             }
         }
 
@@ -267,9 +272,10 @@ namespace MusicLibGeneratorGUI {
                 WriteSettingsToFile();
             }
             else {
+                bool dontThrow = false;
                 try {
                     using (StreamReader sr = new StreamReader("savedConfig.cfg")) {
-                        string[] SA = new string[4];
+                        string[] SA = new string[5];
                         for(int i = 0; i < SA.Length; i++){ 
                             SA[i] = sr.ReadLine();
                         }
@@ -286,11 +292,20 @@ namespace MusicLibGeneratorGUI {
                             iniRadio.Checked = SA[3].Split('=')[1] == "ini";
                             //folderRadio.Checked = !iniRadio.Checked;
                         }
+                        if (SA[4].Split('=').Length == 2)
+                        {
+                            logging_checkbox.Checked = SA[4].Split('=')[1] == "true";
+                        }
                         
                     }
                 }
-                catch (NullReferenceException) { }
-                catch (Exception e) { ShowErrDialog(ExitCodes.ConfigError, e); }
+                catch (NullReferenceException) { dontThrow = true; }
+                catch (Exception e) {
+                    if (!dontThrow)
+                    {
+                        ShowErrDialog(ExitCodes.ConfigError, e);
+                    }
+                }
             }
             startUp = false;
         }

@@ -15,7 +15,8 @@ namespace MusicLibGenerator {
             IncorrectAmountArgs = 2,
             DupecheckArgUnresolved = 3,
             InvalidSongPath = 4,
-            NoMethodSpecified = 5
+            NoMethodSpecified = 5,
+            LoggingArgUnresolved = 6
         }
 
         enum Method : byte {
@@ -31,6 +32,7 @@ namespace MusicLibGenerator {
 
         //DUPECHECK VARS
         static List<string> IDs = new List<string>();
+        static List<byte[]> IDs_HASH = new List<byte[]>();
 
         //CONSOLE WINDOW VARS
         static int totalSongs = 0;
@@ -83,7 +85,6 @@ namespace MusicLibGenerator {
         }
 
         static List<Song> Main_iniMethod_Complex(List<Song> innersong, string innerpath) {
-
             //GET MASTERS
             List<string> osuFiles = new List<string>();
             List<string> innerSongFiles = new List<string>();
@@ -115,9 +116,10 @@ namespace MusicLibGenerator {
                 }
 
                 Song innerSong = new Song();
-                bool p = false;
-                bool t = false;
-                bool a = false;
+                bool p = false; //Path
+                bool t = false; //Title
+                bool a = false; //Artist
+                bool l = false; //Length
                 bool img = false;
 
                 int lineNum = 0;
@@ -182,9 +184,60 @@ namespace MusicLibGenerator {
                         }
                         //catch (Exception) { }
                     }
-                    //check if all details gathered
-                    if (p && t && a && img)
+
+                    //Get song length by hitobjects
+                    if (line == "[HitObjects]")
                     {
+                        //try
+                        //{
+                        int mod = 1;
+                        bool firstLineValFound = false;
+                        long firstLineVal = 0;
+                        long lastLineVal = 0;
+                        while (true)
+                        {
+                            if (!firstLineValFound)
+                            {
+                                if (lines[lineNum + mod].StartsWith("//"))
+                                {
+                                    mod++;
+                                    continue;
+                                }
+                                else
+                                {
+                                    string[] innersplit = lines[lineNum + mod].Split(',');
+                                    firstLineVal = Convert.ToInt64(innersplit[2]);
+                                    firstLineValFound = true;
+                                }
+                            }
+                            else
+                            {
+                                string[] innersplit = lines[lines.Length-1].Split(',');
+                                lastLineVal = Convert.ToInt64(innersplit[2]);
+                                break;
+                            }
+                        }
+                        innerSong.HOLength = lastLineVal - firstLineVal;
+                        l = true;
+                    }
+
+                    //check if all details gathered
+                    if (p && t && a && l && img)
+                    {
+                        //DUPECHECK
+                        if (dupeCheckByID)
+                        {
+                            innerSong.SetSongHash();
+                            //if(innerSong.path.Contains("Ages Die")) { System.Diagnostics.Debugger.Break(); }
+                            if (IDs_HASH.Any(x => x.SequenceEqual(innerSong.IDHash)))
+                            {
+                                skippedOrExisting++;
+                                innerSong.ShouldSkip = true;
+                                ExLogger.Log("DUPECHECKING",$"Duplicate skipped ({innerSong.path})");
+                                return new List<Song>() { innerSong };
+                            }
+                            IDs_HASH.Add(innerSong.IDHash);
+                        }
                         break;
                     }
 
@@ -213,12 +266,6 @@ namespace MusicLibGenerator {
                     innerSongs.Add(innerSong);
                 }
 
-                string imgPath = innerSong.imgPath ?? cacheImagePath;
-                if(imgPath == null)
-                {
-                    ExLogger.Log("IMGPATHING", $"Image not found for path ({innerSong.path})");
-                    //System.Diagnostics.Debugger.Break();
-                }
             }
                 return innerSongs;
 
@@ -236,11 +283,12 @@ namespace MusicLibGenerator {
         }
 
         static void WriteFile(List<Song> songs) {
-
-            
-
             foreach (Song song in songs) {
                 //FILE WRITING
+                if (song.ShouldSkip) {
+                    skippedOrExisting++;
+                    return;
+                }
                 if (!System.IO.File.Exists(song.path)) {
                     skippedOrExisting++;
                     return;
@@ -267,6 +315,11 @@ namespace MusicLibGenerator {
 
                 if (tfile.Tag.Performers.Length == 0) {
                     tfile.Tag.Performers = new string[] { song.Artist };
+                }
+
+                if(song.imgPath == "" || song.imgPath == null)
+                {
+                    ExLogger.Log("IMGPATHING", $"Image not found for path ({song.path})");
                 }
 
                 if (tfile.Tag.Pictures.Length == 0 && song.imgPath != "" && song.imgPath != null) {
@@ -296,11 +349,12 @@ namespace MusicLibGenerator {
             if(args[0].ToLower() == "/help") {
                 Console.WriteLine("Argument 1 should be your osu! songs directory. Example: E:\\osu!\\Songs " +
                     "\nArgument 2 should be the directory to copy them to. Example: E:\\Music " +
-                    "\nArgument 3 must be either True or False. This argument decides whether to skip songs with the same folder ID");
+                    "\nArgument 3 must be either True or False. This argument decides whether to skip songs with the same folder ID" +
+                    "\nArgument 4 must be either True or False. This argument enables or disables logging per failed or skipped song (Log.log)");
                 Environment.Exit((int)Exit.Success);
             }
-            if(args.Length < 3) {
-                Console.Write($"Invalid number of arguments ({args.Length}) given, (3) required");
+            if(args.Length < 4) {
+                Console.Write($"Invalid number of arguments ({args.Length}) given, (4) required");
                 Environment.Exit((int)Exit.IncorrectAmountArgs);
             }
             //if (!args[1].EndsWith("\\osu!\\Songs")) {
@@ -311,17 +365,23 @@ namespace MusicLibGenerator {
                 Console.Write($"Argument 3 invalid, ID Dupechecking must be either True or False");
                 Environment.Exit((int)Exit.DupecheckArgUnresolved);
             }
-            if (args.Length > 3) {
-                method = args[3].ToLower() == "-s" ? Method.Simple : Method.None;
-                method = args[3].ToLower() == "-i" ? Method.ini : Method.None;
-                if(method == Method.None) {
-                    Console.Write("Method not specified in argument 4, use -s for old hierarchy method, and -i for ini indexing method");
-                    Environment.Exit((int)Exit.NoMethodSpecified);
-                }
+            //if (args.Length > 3) {
+            //    method = args[3].ToLower() == "-s" ? Method.Simple : Method.None;
+            //    method = args[3].ToLower() == "-i" ? Method.ini : Method.None;
+            //    if(method == Method.None) {
+            //        Console.Write("Method not specified in argument 4, use -s for old hierarchy method, and -i for ini indexing method");
+            //        Environment.Exit((int)Exit.NoMethodSpecified);
+            //    }
+            //}
+            if (!bool.TryParse(args[3], out ExLogger.LoggingEnabled))
+            {
+                Console.Write($"Argument 4 invalid, logging must be either True or False");
+                Environment.Exit((int)Exit.LoggingArgUnresolved);
             }
+
             bool NO_WINDOW = false;
-            if(args.Length > 4) {
-                if(args[4].ToLower() == "-nw") {
+            if(args.Length > 5) {
+                if(args[5].ToLower() == "-nw") {
                     NO_WINDOW = true;
                 }
             }
@@ -346,11 +406,12 @@ namespace MusicLibGenerator {
                 //
                 totalSongs = SongDirs.Length;
 
-                //PRELOOP SETUP
-                //if (dupeCheckByID) { Console.WriteLine("Running with DupeCheck"); }
+            //PRELOOP SETUP
+            //if (dupeCheckByID) { Console.WriteLine("Running with DupeCheck"); }
 
-                //MAIN LOOP
-                foreach (string s in SongDirs) {
+            ExLogger.LogSeparator("BEGIN");
+            //MAIN LOOP
+            foreach (string s in SongDirs) {
 
                     count++;
                     if (!NO_WINDOW) {
@@ -377,9 +438,17 @@ namespace MusicLibGenerator {
                     Console.WriteLine("Skipped or existing files--: " + skippedOrExisting);
                     Console.WriteLine("------------------------------");
                 }
-                //Console.WriteLine("Press any key to end");
-                //Console.ReadKey();
-                Environment.Exit((int)Exit.Success);
+            //Console.WriteLine("Press any key to end");
+            //Console.ReadKey();
+            ExLogger.LogNewline();
+            ExLogger.Log("STATS", "Successful file extractions: " + successfulCopies);
+            ExLogger.Log("STATS", "Failed file extractions----: " + failedCopies);
+            ExLogger.Log("STATS", "Skipped or existing files--: " + skippedOrExisting);
+            ExLogger.LogNewline();
+            ExLogger.LogSeparator("COMPLETE");
+            //ExLogger.LogNewline();
+
+            Environment.Exit((int)Exit.Success);
 
 #if DEBUG == false
             }

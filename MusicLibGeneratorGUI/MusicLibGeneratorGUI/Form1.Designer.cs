@@ -34,6 +34,7 @@
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.iniRadio = new System.Windows.Forms.RadioButton();
+            this.logging_checkbox = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -143,6 +144,17 @@
             this.iniRadio.UseVisualStyleBackColor = true;
             this.iniRadio.CheckedChanged += new System.EventHandler(this.iniRadio_CheckedChanged);
             // 
+            // logging_checkbox
+            // 
+            this.logging_checkbox.AutoSize = true;
+            this.logging_checkbox.Location = new System.Drawing.Point(112, 124);
+            this.logging_checkbox.Name = "logging_checkbox";
+            this.logging_checkbox.Size = new System.Drawing.Size(100, 17);
+            this.logging_checkbox.TabIndex = 3;
+            this.logging_checkbox.Text = "Enable Logging";
+            this.logging_checkbox.UseVisualStyleBackColor = true;
+            this.logging_checkbox.CheckedChanged += new System.EventHandler(this.dupecheck_Checkbox_CheckedChanged);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -151,6 +163,7 @@
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.start_button);
+            this.Controls.Add(this.logging_checkbox);
             this.Controls.Add(this.dupecheck_Checkbox);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
@@ -184,6 +197,7 @@
         private System.Windows.Forms.ProgressBar progressBar1;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.RadioButton iniRadio;
+        private System.Windows.Forms.CheckBox logging_checkbox;
     }
 }
 
