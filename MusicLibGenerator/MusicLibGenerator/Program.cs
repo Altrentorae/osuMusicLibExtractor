@@ -16,7 +16,8 @@ namespace MusicLibGenerator {
             DupecheckArgUnresolved = 3,
             InvalidSongPath = 4,
             NoMethodSpecified = 5,
-            LoggingArgUnresolved = 6
+            LoggingArgUnresolved = 6,
+            ForceMetadataArgUnresolved = 7
         }
 
         enum Method : byte {
@@ -125,6 +126,8 @@ namespace MusicLibGenerator {
                 int lineNum = 0;
                 foreach (string line in lines)
                 {
+                    
+
                     string[] split = line.Split(':');
                     //Get Audio
                     if (split[0] == "AudioFilename")
@@ -136,6 +139,7 @@ namespace MusicLibGenerator {
                     //Get title
                     if (split[0] == "Title")
                     {
+                        //if (innerSong.path.Contains("ClariS")) { System.Diagnostics.Debugger.Break(); }
                         innerSong.Title = split[1];
                         t = true;
                     }
@@ -228,7 +232,6 @@ namespace MusicLibGenerator {
                         if (dupeCheckByID)
                         {
                             innerSong.SetSongHash();
-                            //if(innerSong.path.Contains("Ages Die")) { System.Diagnostics.Debugger.Break(); }
                             if (IDs_HASH.Any(x => x.SequenceEqual(innerSong.IDHash)))
                             {
                                 skippedOrExisting++;
@@ -282,6 +285,16 @@ namespace MusicLibGenerator {
             return input;
         }
 
+        public static bool IsAsciiOnly(string input)
+        {
+            if(input == null) { return true; }
+            foreach (char c in input)
+            {
+                if(c > 128) { return false; }
+            }
+            return true;
+        }
+
         static void WriteFile(List<Song> songs) {
             foreach (Song song in songs) {
                 //FILE WRITING
@@ -311,10 +324,50 @@ namespace MusicLibGenerator {
                 tfile = TagLib.File.Create(song.newDir);
                 tags = t;
 
-                tfile.Tag.Title = string.IsNullOrWhiteSpace(tfile.Tag.Title) ? song.Title : tfile.Tag.Title;
+                //if (song.Title.Contains("Black Lotus")) { System.Diagnostics.Debugger.Break(); }
+                
 
-                if (tfile.Tag.Performers.Length == 0) {
-                    tfile.Tag.Performers = new string[] { song.Artist };
+                bool AsciiOnly = true;
+
+                if (AsciiOnly)
+                {
+
+                    if (string.IsNullOrWhiteSpace(tfile.Tag.Title) || !IsAsciiOnly(tfile.Tag.Title) || forceNewMetadata)
+                    {
+                        if (!IsAsciiOnly(tfile.Tag.Title) || forceNewMetadata)
+                        {
+                            ExLogger.Log("ASCII", $"Song title adjusted from original ({tfile.Tag.Title} => {song.Title})");
+                        }
+                        tfile.Tag.Title = song.Title;
+                    }
+
+                    if (forceNewMetadata)
+                    {
+                        string oldArtist = "<NONE>";
+                        if(tfile.Tag.Performers.Length != 0) { oldArtist = tfile.Tag.Performers[0]; }
+                        ExLogger.Log("ASCII", $"Song artist adjusted from original ({oldArtist} => {song.Artist})");
+                        tfile.Tag.Performers = new string[] { song.Artist };
+                    }
+                    else if (tfile.Tag.Performers.Length != 0)
+                    {
+                        if (!IsAsciiOnly(tfile.Tag.Performers[0]))
+                        {
+                            ExLogger.Log("ASCII", $"Song artist adjusted from original ({tfile.Tag.Performers[0]} => {song.Artist})");
+                            tfile.Tag.Performers = new string[] { song.Artist };
+                        }
+                    }
+                    else
+                    {
+                        tfile.Tag.Performers = new string[] { song.Artist };
+                    }
+                }
+                else
+                {
+                    tfile.Tag.Title = string.IsNullOrWhiteSpace(tfile.Tag.Title) ? song.Title : tfile.Tag.Title;
+                    if (tfile.Tag.Performers.Length == 0)
+                    {
+                        tfile.Tag.Performers = new string[] { song.Artist };
+                    }
                 }
 
                 if(song.imgPath == "" || song.imgPath == null)
@@ -342,19 +395,20 @@ namespace MusicLibGenerator {
             }
         }
 
-        
 
+        static bool forceNewMetadata = false;
         static void Main(string[] args) {
             //VALIDATE ARGS
             if(args[0].ToLower() == "/help") {
                 Console.WriteLine("Argument 1 should be your osu! songs directory. Example: E:\\osu!\\Songs " +
                     "\nArgument 2 should be the directory to copy them to. Example: E:\\Music " +
                     "\nArgument 3 must be either True or False. This argument decides whether to skip songs with the same folder ID" +
-                    "\nArgument 4 must be either True or False. This argument enables or disables logging per failed or skipped song (Log.log)");
+                    "\nArgument 4 must be either True or False. This argument enables or disables logging per failed or skipped song (Log.log)" +
+                    "\nArgument 5 must be either True or False. This argument is whether to force replacement of existing metadata on files");
                 Environment.Exit((int)Exit.Success);
             }
-            if(args.Length < 4) {
-                Console.Write($"Invalid number of arguments ({args.Length}) given, (4) required");
+            if(args.Length < 5) {
+                Console.Write($"Invalid number of arguments ({args.Length}) given, (5) required");
                 Environment.Exit((int)Exit.IncorrectAmountArgs);
             }
             //if (!args[1].EndsWith("\\osu!\\Songs")) {
@@ -379,8 +433,14 @@ namespace MusicLibGenerator {
                 Environment.Exit((int)Exit.LoggingArgUnresolved);
             }
 
+            if (!bool.TryParse(args[4], out forceNewMetadata))
+            {
+                Console.Write($"Argument 5 invalid, forceNewMetadata must be either True or False");
+                Environment.Exit((int)Exit.ForceMetadataArgUnresolved);
+            }
+
             bool NO_WINDOW = false;
-            if(args.Length > 5) {
+            if(args.Length > 6) {
                 if(args[5].ToLower() == "-nw") {
                     NO_WINDOW = true;
                 }

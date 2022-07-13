@@ -35,6 +35,7 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.iniRadio = new System.Windows.Forms.RadioButton();
             this.logging_checkbox = new System.Windows.Forms.CheckBox();
+            this.forceNewMetadata_checkbox = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -97,9 +98,9 @@
             this.dupecheck_Checkbox.AutoSize = true;
             this.dupecheck_Checkbox.Location = new System.Drawing.Point(112, 101);
             this.dupecheck_Checkbox.Name = "dupecheck_Checkbox";
-            this.dupecheck_Checkbox.Size = new System.Drawing.Size(117, 17);
+            this.dupecheck_Checkbox.Size = new System.Drawing.Size(128, 17);
             this.dupecheck_Checkbox.TabIndex = 3;
-            this.dupecheck_Checkbox.Text = "Skip same osu! IDs";
+            this.dupecheck_Checkbox.Text = "Skip Duplicate Songs";
             this.dupecheck_Checkbox.UseVisualStyleBackColor = true;
             this.dupecheck_Checkbox.CheckedChanged += new System.EventHandler(this.dupecheck_Checkbox_CheckedChanged);
             // 
@@ -155,6 +156,17 @@
             this.logging_checkbox.UseVisualStyleBackColor = true;
             this.logging_checkbox.CheckedChanged += new System.EventHandler(this.dupecheck_Checkbox_CheckedChanged);
             // 
+            // forceNewMetadata_checkbox
+            // 
+            this.forceNewMetadata_checkbox.AutoSize = true;
+            this.forceNewMetadata_checkbox.Location = new System.Drawing.Point(112, 144);
+            this.forceNewMetadata_checkbox.Name = "forceNewMetadata_checkbox";
+            this.forceNewMetadata_checkbox.Size = new System.Drawing.Size(126, 17);
+            this.forceNewMetadata_checkbox.TabIndex = 3;
+            this.forceNewMetadata_checkbox.Text = "Force New Metadata";
+            this.forceNewMetadata_checkbox.UseVisualStyleBackColor = true;
+            this.forceNewMetadata_checkbox.CheckedChanged += new System.EventHandler(this.dupecheck_Checkbox_CheckedChanged);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -163,6 +175,7 @@
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.start_button);
+            this.Controls.Add(this.forceNewMetadata_checkbox);
             this.Controls.Add(this.logging_checkbox);
             this.Controls.Add(this.dupecheck_Checkbox);
             this.Controls.Add(this.label2);
@@ -198,6 +211,7 @@
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.RadioButton iniRadio;
         private System.Windows.Forms.CheckBox logging_checkbox;
+        private System.Windows.Forms.CheckBox forceNewMetadata_checkbox;
     }
 }
 

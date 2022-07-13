@@ -46,7 +46,8 @@ namespace MusicLibGeneratorGUI {
                 string pathB = "\"" + targetPathEntry.Text + "\\\\\"";
 
                 string logging = logging_checkbox.Checked ? "true" : "false";
-                
+                string md = forceNewMetadata_checkbox.Checked ? "true" : "false";
+
 
                 //string pathA = osuPathEntry.Text;
                 //string pathB = targetPathEntry.Text;
@@ -58,7 +59,8 @@ namespace MusicLibGeneratorGUI {
                 proc.StartInfo.Arguments =
                     pathA + " " + pathB + " " +
                     cb + " " + 
-                    logging;
+                    logging + " " +
+                    md;
                 proc.Start();
                 proc.WaitForExit();
                 if (notableErrs.Contains((uint)proc.ExitCode)) {
@@ -145,6 +147,8 @@ namespace MusicLibGeneratorGUI {
             DupecheckArgUnresolved = 3,
             InvalidSongPath = 4,
             LoggingArgUnresolved = 6,
+            ForceMetadataArgUnresolved = 7,
+
             //GUI Proj Specific
             MainExeMissing = 101,
             ConfigError = 102,
@@ -159,6 +163,7 @@ namespace MusicLibGeneratorGUI {
                 case ExitCodes.InvalidSongPath: e = "Song path was invalid, please enter a valid song path ending in \\osu!\\Songs"; break;
                 case ExitCodes.IncorrectAmountArgs:
                 case ExitCodes.LoggingArgUnresolved:
+                case ExitCodes.ForceMetadataArgUnresolved:
                 case ExitCodes.DupecheckArgUnresolved: e = "This shouldn't be possible, what have you done???"; break;
                 //
                 case ExitCodes.MainExeMissing: e = "MusicLibGenerator.exe was not found"; break;
@@ -256,6 +261,7 @@ namespace MusicLibGeneratorGUI {
             if (startUp) { return; }
             string cb = dupecheck_Checkbox.Checked ? "true" : "false";
             string lo = logging_checkbox.Checked ? "true" : "false";
+            string fnmd = forceNewMetadata_checkbox.Checked ? "true" : "false";
             string mTypeStr = iniRadio.Checked ? "ini" : "simple";
             using (StreamWriter sw = new StreamWriter("savedConfig.cfg", false)){
                 sw.WriteLine("songPath=" + osuPathEntry.Text);
@@ -263,6 +269,7 @@ namespace MusicLibGeneratorGUI {
                 sw.WriteLine("dupechecking=" + cb);
                 sw.WriteLine("mType=" + mTypeStr);
                 sw.WriteLine("logging=" + lo);
+                sw.WriteLine("forceNMD=" + fnmd);
             }
         }
 
@@ -275,7 +282,7 @@ namespace MusicLibGeneratorGUI {
                 bool dontThrow = false;
                 try {
                     using (StreamReader sr = new StreamReader("savedConfig.cfg")) {
-                        string[] SA = new string[5];
+                        string[] SA = new string[6];
                         for(int i = 0; i < SA.Length; i++){ 
                             SA[i] = sr.ReadLine();
                         }
@@ -295,6 +302,10 @@ namespace MusicLibGeneratorGUI {
                         if (SA[4].Split('=').Length == 2)
                         {
                             logging_checkbox.Checked = SA[4].Split('=')[1] == "true";
+                        }
+                        if (SA[5].Split('=').Length == 2)
+                        {
+                            forceNewMetadata_checkbox.Checked = SA[5].Split('=')[1] == "true";
                         }
                         
                     }
