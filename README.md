@@ -34,6 +34,7 @@ For using the UI this is all there really is to it, if there are any errors they
 * Arg 2 = directory for the results to be copied to, for example: `E:\Music`
 * Arg 3 = True or False, whether to skip songs that share a folder ID. if unsure use `True`
 * Arg 4 = True or False, whether to log skipped or failed songs to file (Log.log)
+* Arg 5 = True or False, whether to force existing metadata from the ORIGINAL file to be replaced
 
 --
 
